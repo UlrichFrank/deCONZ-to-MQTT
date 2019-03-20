@@ -1,6 +1,18 @@
 {
-  "dependencies": {
-    "mqtt": "^2.18.8",
-    "ws": "^3.3.3"
-  }
+	"name": "deconztomqtt",
+	"version": "0.0.1",
+	"description": "deCONZ to MQTT bridge",
+	"author": "UlrichFrank",
+	"license": "Apache-2.0",
+	"repository": "https://github.com/UlrichFrank/deCONZ-to-MQTT",
+	"keywords": [
+		"deCONZ",
+		"MQTT",
+		"Zigbee",
+		"openHAB"
+	],
+	"dependencies": {
+		"mqtt": "^2.18.8",
+		"ws": "^3.3.3"
+	}
 }
