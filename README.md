@@ -3,7 +3,8 @@ Bridge deCONZ events and publish to MQTT
 
 
 ## config.json
-```{
+```
+{
     "deconz": {
         "host" : "192.168.1.1",
         "port" : 8443
