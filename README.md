@@ -20,7 +20,7 @@ the given username can be used as API key.
 
 ## config.json
 
-Example configuration with two sensors:
+Example configuration with two aqara humidity sensor sensors:
 
 ```
 {
