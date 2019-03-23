@@ -2,14 +2,17 @@
 
 const WebSocket = require('ws');
 const mqtt = require('mqtt')
-const mustache = require('mustache')
 const config = require('./config.json');
-const SENSOR_PATH = 'deconz';
+const socket = new WebSocket(`ws://${config.deconz.host}:${config.deconz.port}`)
 
 var mqttConnected = false;
 
-const socket = new WebSocket('ws://' + config.deconz.host + ':' + config.deconz.port);
-var client = mqtt.connect('mqtt://' + config.mqtt.host + ':' + config.mqtt.port, { keepalive: 10000, username : config.mqtt.username, password : config.mqtt.password});
+const client = mqtt.connect(`mqtt://${config.mqtt.host}:${config.mqtt.port}`, { 
+  keepalive: 10000, 
+  clientId: "deconz-to-mqtt",
+  username: config.mqtt.username, 
+  password: config.mqtt.password
+});
 
 client.on('error', () => {
   console.log('MQTT connection failure or parsing error');
@@ -17,7 +20,7 @@ client.on('error', () => {
 });
 
 client.on('offline', () => {
-  console.log('MQTT going oflline');
+  console.log('MQTT going offline');
   mqttConnected = false;
 });
 
@@ -28,35 +31,42 @@ client.on('connect', () => {
 
 client.on('end', () => {
   console.log('MQTT shutdown');
-  mqttConnected = true;
+  mqttConnected = false;
 });
 
 client.on('message', (topic,message) => {
   console.log('onMessageArrived:' + message.payloadString);
 });
 
-
 socket.on('open', () => {
   socket.on('message', data => {
-    var sensorData = JSON.parse(data)
+    const sensorData = JSON.parse(data)
+    const sensorId = sensorData.id;
+    const sensor = config.sensors[sensorId];
+    if (sensor === undefined) {
+      console.log(`sensor not defined: ${sensorId}`)
+      return
+    }
 
-    var view = {
-      path : SENSOR_PATH,
-      id : sensorData.id,
-      type : sensorData.r,
-      state_topic : config.mqtt.state_topic
-    }
-    var topic = mustache.render('{{path}}/{{id}}/{{type}}/{{state_topic}}', view);
+    const topic = `${sensor.topic}`
+    const dataType = `${sensor.data}`
+    const value = sensorData.state[dataType] / sensor.divisor;
+    
+    console.log(`topic: ${topic}
+data: ${value}`)
+
     if (mqttConnected) {
-      client.publish(topic, data, { qos:0, retained:false } );
-      console.log(topic + data);
+      client.publish(topic, `${value}`)
+      console.log("data published");
     }
-    //console.log(data);
+    else {
+      console.log("mqtt not connected.");
+    }
   });
-  socket.send('test');
 });
 
 socket.on('error', () => {
   console.log('something has gone wrong');
 });
 
+console.log('started');
