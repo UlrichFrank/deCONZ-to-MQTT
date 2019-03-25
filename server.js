@@ -52,8 +52,7 @@ socket.on('open', () => {
     const dataType = `${sensor.data}`
     const value = sensorData.state[dataType] / sensor.divisor;
     
-    console.log(`topic: ${topic}
-data: ${value}`)
+    console.log(`topic: ${topic} data: ${value}`)
 
     if (mqttConnected) {
       client.publish(topic, `${value}`)
