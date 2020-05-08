@@ -49,9 +49,18 @@ socket.on('open', () => {
     }
 
     const topic = `${sensor.topic}`
-    const dataType = `${sensor.data}`
-    const value = sensorData.state[dataType] / sensor.divisor;
-    
+
+    var value = sensorData.state[`${sensor.data}`]
+
+    const isInt = value === parseInt(value)
+    const isFloat = value === parseFloat(value)
+    const isNumeric = isInt || isFloat
+    const hasDivisor = !(sensor.divisor === undefined)
+
+    if (isNumeric && hasDivisor) {
+      value /= sensor.divisor
+    }
+
     console.log(`topic: ${topic} data: ${value}`)
 
     if (mqttConnected) {
